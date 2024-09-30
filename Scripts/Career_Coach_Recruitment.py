@@ -114,7 +114,7 @@ def create_feedback_dataframe(primary_key, Name, Email_id, Number, Profile, Inst
     return feedback_df
 
 
-
+#supabase credentials to add data to supabase database
 url: str = 'https://twetkfnfqdtsozephdse.supabase.co'
 key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3ZXRrZm5mcWR0c296ZXBoZHNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjE5Njk0MzcsImV4cCI6MjAzNzU0NTQzN30.D76H5RoTel0M7Wj6PTRSAXxxYGic7K25BSaeQDZqIN0'
 # Create a Supabase client

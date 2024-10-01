@@ -1,3 +1,4 @@
+#Import necessary libraries 
 import pandas as pd
 import streamlit as st
 import gspread
@@ -17,22 +18,26 @@ from supabase.client import ClientOptions
 def get_timestamp():
     return datetime.now()
 
-# Display the PNG image in the top left corner of the Streamlit sidebar with custom dimensions
+# Display the PNG image in the top of the Streamlit sidebar with custom dimensions
 image_path = 'https://twetkfnfqdtsozephdse.supabase.co/storage/v1/object/sign/stemcheck/VS-logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzdGVtY2hlY2svVlMtbG9nby5wbmciLCJpYXQiOjE3MjE5NzA3ODUsImV4cCI6MTc1MzUwNjc4NX0.purLZOGk272W80A4OlvnavqVB9u-yExhzpmI3dZrjdM&t=2024-07-26T05%3A13%3A02.704Z'
 st.markdown(
     f'<div style="text-align:center"><img src="{image_path}" width="150"></div>',
     unsafe_allow_html=True
 )
-
+#Display title in bold
 st.markdown(
     "<h1 style='color: black; font-weight: bold;'>Kalpana - She for STEM Soft Skill Trainer and Career Coach Recruitment Form</h1>", 
     unsafe_allow_html=True
 )
 
+
+#Add google form questions  
+
 Name=st.text_input("Enter your full name*")
 Email_id=st.text_input("Enter your email address*")
-Number=st.text_input("Enter your WhatsApp number (with country code, DONOT ADD '+')*")
-Profile=st.text_input("Enter your LinkedIn profile link here*")
+Number=st.text_input("Enter your WhatsApp number (Please Add Country Code, DONOT ADD '+')*")
+
+Profile=st.text_input("Enter your LinkedIn profile link here")
 Institute=st.text_input("Enter your current Institute/University/Organization*")
 Current_job=st.text_input("Current Job title/Designation*")
 Degree = st.selectbox('Highest degree obtained*',("B.Sc.","M.Sc.","B.E./B.Tech.","M.Tech.","B.Pharm.","M.Pharm.","MBA","Ph.D."))
@@ -61,10 +66,12 @@ Current_city=st.text_input("Your current city*")
 options = ['English','Hindi','Marathi','Malayalam','Kannada','Telgu','Assamese','Bengali','Gujarati','Manipuri','Tamil','Odia','Punjabi','Urdu','Maithili','Konkani','Kashmiri']
 selected_options = st.multiselect("What communication languages are you comfortable in? * ", options)
 
+
 comments=['Soft skills and Professional Development Trainer |/n Teach job/career readiness MasterClasses |/n Virtual engagement | 1.5 hours, 3-4 times a year','Career coach | Conduct job/career readiness workshops |/n In-person engagement |/n 2 - 4 hours, 1-2 times a year']
 comments_a=st.selectbox("How would you like to join VigyanShaala's #SheforSTEM movement?*",comments)
 
-travel_cost=st.radio('If we cover travel costs, are you willing to travel out-of-town for conducting these in-person workshops?',('Yes','No'))
+
+travel_cost=st.radio('If we cover travel costs, are you willing to travel out-of-town for conducting these in-person workshops?*',('Yes','No'))
 
 session_to_attend=['Crafting a winning STEM resume','Writing effective cover letters for STEM positions','Leveraging LinkedIn for STEM career advancement','Strategies for securing STEM internships','Mastering technical interviews','Navigating the STEM job market','Negotiating salary and benefits in STEM roles',
                    'Excelling in STEM job interviews','Developing leadership skills in STEM','Building your personal brand in STEM','Enhancing technology proficiency for STEM careers',
@@ -73,17 +80,24 @@ session_to_attend=['Crafting a winning STEM resume','Writing effective cover let
                     'Effective communication strategies for STEM fields','Polishing presentation skills for STEM presentations','Fostering teamwork in STEM settings','Critical thinking and decision-making skills for STEM professionals','Adapting to changes in the STEM industry','Project management techniques for STEM projects',
                     'Networking strategies for advancing in STEM careers','Personal and professional growth in STEM fields']
 
-session=st.multiselect('Which of the following workshops would you like to conduct? Please select all that apply.',session_to_attend)
+session=st.multiselect('Which of the following workshops would you like to conduct? Please select all that apply.*',session_to_attend)
 
-Binary=st.radio('Based on the choices you made in the previous question, do you have experience in conducting those specific workshops or similar sessions?',('Yes','No'))
+
+Binary=st.radio('Based on the choices you made in the previous question, do you have experience in conducting those specific workshops or similar sessions?*',('Yes','No'))
 workshop=st.text_input('Are there any other workshop topics that you would like to cover?')
 conducted=st.radio('How many such workshops have you conducted so far?*',("None","1-10","11-20",">20"))
 preferred_time=st.radio(' What is your preferred duration for the workshop?*',("1 hour","2 hours","4 hours"))
 upload1=st.file_uploader(' If possible, please upload a sample of your work.',accept_multiple_files=False, type=["csv", "txt"])
-call=st.radio('Would you be open to schedule a 10-15 minute call with us to discuss the structure/content of your class and tailor the workshop to our target audience?',('Yes','No'))
+call=st.radio('Would you be open to schedule a 10-15 minute call with us to discuss the structure/content of your class and tailor the workshop to our target audience?*',('Yes','No'))
 upload2=st.file_uploader('Upload your Curriculum Vitae/Resume*',accept_multiple_files=False, type=["csv", "txt"])
-upload3=st.file_uploader('Please upload your bio and a professional headshot.*',accept_multiple_files=False,type=["csv","txt"])
+upload3=st.file_uploader('Please upload your bio and a professional headshot.',accept_multiple_files=False,type=["csv","txt"])
 
+#Function to stop if the compulsory marked fields are not filled
+if not Name or not Email_id or not Number or not Institute or not Current_job or not Degree or not Country or not Current_city or not selected_options or not comments or not travel_cost or not session or not Binary or not conducted or not preferred_time or not call or not upload2:
+    st.error("Please fill in all the compulsory fields marked with * before proceeding.")
+    st.stop()
+
+#Create Data frame of the replies stored in the GUI's elements
 def create_feedback_dataframe(primary_key, Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,travel_cost,session,Binary,workshop,conducted,preferred_time,upload1,call,upload2,upload3):
     data = {
         'ID': primary_key,
@@ -114,7 +128,7 @@ def create_feedback_dataframe(primary_key, Name, Email_id, Number, Profile, Inst
     return feedback_df
 
 
-#supabase credentials to add data to supabase database
+
 url: str = 'https://twetkfnfqdtsozephdse.supabase.co'
 key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3ZXRrZm5mcWR0c296ZXBoZHNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjE5Njk0MzcsImV4cCI6MjAzNzU0NTQzN30.D76H5RoTel0M7Wj6PTRSAXxxYGic7K25BSaeQDZqIN0'
 # Create a Supabase client
@@ -127,6 +141,7 @@ supabase: Client = create_client(url, key, options=ClientOptions(
 
 combined_button_text = "Submit"   
 
+#Store data to Supabase 
 if st.button(combined_button_text):
     feedback_df = create_feedback_dataframe(primary_key, Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,travel_cost,session,Binary,workshop,conducted,preferred_time,upload1,call,upload2,upload3)
 

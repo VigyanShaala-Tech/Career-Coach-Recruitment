@@ -32,6 +32,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 #Google form Questions
 
 Name=st.text_input("Enter your full name*")
@@ -43,6 +44,7 @@ Institute=st.text_input("Enter your current Institute/University/Organization*")
 Current_job=st.text_input("Current Job title/Designation")
 Degree = st.selectbox('Highest degree obtained*',("B.Sc.","M.Sc.","B.E./B.Tech.","M.Tech.","B.Pharm.","M.Pharm.","MBA","Ph.D."))
 primary_key = f"{Number}_{Name}"
+
 
 
 country_names = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","The Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin",
@@ -93,7 +95,7 @@ call=st.radio('Would you be open to schedule a 10-15 minute call with us to disc
 upload2=st.file_uploader('Upload your Curriculum Vitae/Resume*',accept_multiple_files=False, type=["pdf", "txt"])
 upload3=st.file_uploader('Please upload your bio and a professional headshot.',accept_multiple_files=False, type=["pdf", "txt"])
 
-if not Name or not Email_id or not Number or not Institute or not Current_job or not Degree or not Country or not Current_city or not selected_options or not comments or not travel_cost or not session or not Binary or not conducted or not call or not upload2:
+if not Name or not Email_id or not Number or not Institute or not Degree or not Country or not Current_city or not selected_options or not comments_a or not travel_cost or not session or not Binary or not conducted or not call or not upload2:
     st.error("Please fill in all the compulsory fields marked with * before proceeding.")
     st.stop()
 
@@ -129,6 +131,7 @@ def create_feedback_dataframe(primary_key, Name, Email_id, Number, Profile, Inst
     return feedback_df
 
 
+
 #Supabase Credential to store data to database 
 
 url: str = 'https://twetkfnfqdtsozephdse.supabase.co'
@@ -155,6 +158,7 @@ if st.button(combined_button_text):
 
     # Insert the JSON data into Supabase
     response_json = supabase.table(table_name).insert([json_data]).execute()
+
 
     #Demo code to add the google drive API . Please give it a AWS backend connection. 
     #####################

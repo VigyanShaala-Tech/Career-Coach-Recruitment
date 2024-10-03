@@ -71,7 +71,7 @@ options = ['English','Hindi','Marathi','Malayalam','Kannada','Telgu','Assamese',
 selected_options = st.multiselect("What communication languages are you comfortable in? * ", options)
 
 
-comments=['Soft skills and Professional Development Trainer |\n Teach job/career readiness MasterClasses |\n Virtual engagement | 1.5 hours, 3-4 times a year','Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year']
+comments=['Soft skills and Professional Development Trainer |\n Teach job/career readiness Master Classes |\n Virtual engagement | 1.5 hours, 3-4 times a year','Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year']
 comments_a=st.selectbox("How would you like to join VigyanShaala's #SheforSTEM movement?*",comments)
 
 travel_cost=st.radio('If we cover travel costs, are you willing to travel out-of-town for conducting these in-person workshops?*',('Yes','No'))

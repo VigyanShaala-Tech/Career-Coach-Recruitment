@@ -77,8 +77,6 @@ selected_options = st.multiselect("What communication languages are you comforta
 comments=['Soft skills and Professional Development Trainer |\n Teach job/career readiness Master Classes |\n Virtual engagement | 1.5 hours, 3-4 times a year','Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year']
 comments_a=st.selectbox("How would you like to join VigyanShaala's #SheforSTEM movement?*",comments)
 
-
-#Display travel cost option only if the particular comment is selected from selectbox.
 if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
      travel_cost=st.radio('If we cover travel costs, are you willing to travel out-of-town for conducting these in-person workshops?*',('Yes','No'))
 
@@ -101,7 +99,7 @@ call=st.radio('Would you be open to schedule a 10-15 minute call with us to disc
 upload2=st.file_uploader('Upload your Curriculum Vitae/Resume*',accept_multiple_files=False, type=["pdf", "txt"])
 upload3=st.file_uploader('Please upload your bio and a professional headshot.',accept_multiple_files=False, type=["pdf", "txt","jpg", "png"])
 
-#Create data frame based on whether it matches the comment in comments selectbox of the interface.
+
 def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3):
     if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
         data = {
@@ -153,7 +151,7 @@ def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Curren
     df = pd.DataFrame(data)
     return df
 
-#Condition to add compulsion to fillup necessary questions.
+
 if not Name or not Email_id or not Number or not Institute or not Degree or not Country or not Current_city or not selected_options or not comments_a or not session or not Binary or not conducted or not call or not upload2:
     st.error("Please fill in all the compulsory fields marked with * before proceeding.")
     st.stop()
@@ -164,7 +162,7 @@ if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-p
 else:
     combined_df = create_feedback_dataframe( Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,' ',session,Binary,workshop,conducted,upload1,call,upload2,upload3)
 
-#Credentials to create connection to Google sheet.
+
 supabase_credentials_url = 'https://twetkfnfqdtsozephdse.supabase.co/storage/v1/object/sign/stemcheck/career-coach-recruitment-bbd9c36f47fe.json?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzdGVtY2hlY2svY2FyZWVyLWNvYWNoLXJlY3J1aXRtZW50LWJiZDljMzZmNDdmZS5qc29uIiwiaWF0IjoxNzI4MDM5OTAzLCJleHAiOjE3NTk1NzU5MDN9.kJOrZP03igSz_fTxLWjbN5svQCYcJZN3xZ9peyHAGY8&t=2024-10-04T11%3A04%3A48.676Z'
 
 # Fetch service account credentials from Supabase storage
@@ -185,15 +183,14 @@ else:
     print("Failed to fetch the service account credentials. Status code:", response.status_code)
 
 
-#Create a button in Streamlit to push inserted data in the Streamlit GUI interface to the Google sheet.
 
-combined_button_text = "Submit"
+# Create a button in Streamlit
+combined_button_text = "Print"
 if st.button(combined_button_text):
     # Insert the feedback dataframe into the Google Sheet
     sheet_key = '1LqOFw7Ho2_Y2Snb0sxgGTyRDz6IWGs58iIRbNOQfSLA'
     #sheet = client.open_by_key(sheet_key).get_worksheet(0)  # Update with the correct sheet name or index
     sheet = client.open('Career_Coach_Recruitment ').sheet1
-    
     # Get existing data and determine the next row
     existing_data = sheet.get_all_values()
     next_row_index = len(existing_data) + 1
@@ -205,11 +202,12 @@ if st.button(combined_button_text):
 
     uploaded_file = upload1.getvalue() if upload1 is not None else None
 
-    if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
-        json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3)
-    else:
-        json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, '', session, Binary, workshop, conducted, upload1, call, upload2, upload3)
+    #if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
+        #json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3)
+    #else:
+        #json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, '', session, Binary, workshop, conducted, upload1, call, upload2, upload3)
 
+    json_serializable_data = combined_df
 
 
     def convert_numpy_arrays_to_lists(data):
@@ -240,7 +238,7 @@ if st.button(combined_button_text):
     except Exception as e:
         print("An error occurred while trying to extract values as a list:", e)
 
-    
+
     # Create a dictionary from the values list
     dict_values = {index: value for index, value in enumerate(values_list)}
 

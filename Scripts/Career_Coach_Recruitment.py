@@ -185,7 +185,7 @@ else:
 
 
 # Create a button in Streamlit
-combined_button_text = "Print"
+combined_button_text = "Submit"
 if st.button(combined_button_text):
     # Insert the feedback dataframe into the Google Sheet
     sheet_key = '1LqOFw7Ho2_Y2Snb0sxgGTyRDz6IWGs58iIRbNOQfSLA'

@@ -15,7 +15,37 @@ import gspread
 from google.oauth2 import service_account
 import json
 import numpy as np
+import boto3
+from botocore.exceptions import NoCredentialsError
+from dotenv import load_dotenv
+load_dotenv()
 
+# AWS credentials setup
+import os
+
+# Use environment variables for AWS credentials
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+s3_bucket_name = os.getenv('BUCKET_NAME')
+# os.environ['AWS_DEFAULT_REGION'] = 'your_preferred_region'
+
+# Configure boto3 with the credentials
+boto3.setup_default_session(
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+)
+
+def upload_to_s3(file, bucket_name, s3_file_name):
+    s3 = boto3.client('s3')
+    try:
+        s3.upload_fileobj(file, bucket_name, s3_file_name)
+        return True
+    except NoCredentialsError:
+        st.error("AWS credentials not available")
+        return False
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return False
 
 
 # Function to get the current timestamp
@@ -94,10 +124,31 @@ session=st.multiselect('Which of the following worskshops would you like to cond
 Binary=st.radio('Based on the choices you made in the previous question, do you have experience in conducting those specific workshops or similar sessions?*',('Yes','No'))
 workshop=st.text_input('Are there any other workshop topics that you would like to cover?')
 conducted=st.radio('How many such workshops have you conducted so far?*',("None","1-10","11-20","More than 20"))
-upload1=st.file_uploader(' If possible, please upload a sample of your work.',accept_multiple_files=False, type=["pdf", "txt"])
+
+
+
+# File upload for sample work
+upload1 = st.file_uploader(' If possible, please upload a sample of your work.', accept_multiple_files=False, type=["pdf", "txt"])
+if upload1:
+    s3_file_name = f"sample_work/{Name}_{upload1.name}" #name can be modified
+    if upload_to_s3(upload1, s3_bucket_name, s3_file_name):
+        st.success(f"Sample work uploaded successfully to S3: {s3_file_name}")
+
+# File upload for CV/Resume
+upload2 = st.file_uploader('Upload your Curriculum Vitae/Resume*', accept_multiple_files=False, type=["pdf", "txt"])
+if upload2:
+    s3_file_name = f"cv_resume/{Name}_{upload2.name}"
+    if upload_to_s3(upload2, s3_bucket_name, s3_file_name):
+        st.success(f"CV/Resume uploaded successfully to S3: {s3_file_name}")
+
+# File upload for bio and headshot
+upload3 = st.file_uploader('Please upload your bio and a professional headshot.', accept_multiple_files=False, type=["pdf", "txt", "jpg", "png"])
+if upload3:
+    s3_file_name = f"bio_headshot/{Name}_{upload3.name}"
+    if upload_to_s3(upload3, s3_bucket_name, s3_file_name):
+        st.success(f"Bio and headshot uploaded successfully to S3: {s3_file_name}")
+
 call=st.radio('Would you be open to schedule a 10-15 minute call with us to discuss the structure/content of your class and tailor the workshop to our target audience?*',('Yes','No'))
-upload2=st.file_uploader('Upload your Curriculum Vitae/Resume*',accept_multiple_files=False, type=["pdf", "txt"])
-upload3=st.file_uploader('Please upload your bio and a professional headshot.',accept_multiple_files=False, type=["pdf", "txt","jpg", "png"])
 
 
 def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3):
@@ -119,10 +170,10 @@ def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Curren
             'Based on the choices you made in the previous question, do you': [Binary],
             'Are there any other workshop topics that you would like to cove': [workshop],
             'How many such workshops have you conducted so far? *': [conducted],
-            'If possible, please upload a sample of your work.': [upload1.name if upload1 else None],
+            'If possible, please upload a sample of your work.': [f"s3://{s3_bucket_name}/sample_work/{Name}_{upload1.name}" if upload1 else None],
             'Would you be open to schedule a 10-15 minute call with us to di': [call],
-            'Upload your Curriculum Vitae/Resume *': [upload2.name if upload2 else None],
-            'Please upload your bio and a professional headshot.': [upload3.name if upload3 else None]
+            'Upload your Curriculum Vitae/Resume *': [f"s3://{s3_bucket_name}/cv_resume/{Name}_{upload2.name}" if upload2 else None],
+            'Please upload your bio and a professional headshot.': [f"s3://{s3_bucket_name}/bio_headshot/{Name}_{upload3.name}" if upload3 else None]
         }
     else:
         data = {
@@ -142,10 +193,10 @@ def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Curren
             'Based on the choices you made in the previous question, do you': [Binary],
             'Are there any other workshop topics that you would like to cove': [workshop],
             'How many such workshops have you conducted so far? *': [conducted],
-            'If possible, please upload a sample of your work.': [upload1.name if upload1 else None],
+            'If possible, please upload a sample of your work.': [f"s3://{s3_bucket_name}/sample_work/{Name}_{upload1.name}" if upload1 else None],
             'Would you be open to schedule a 10-15 minute call with us to di': [call],
-            'Upload your Curriculum Vitae/Resume *': [upload2.name if upload2 else None],
-            'Please upload your bio and a professional headshot.': [upload3.name if upload3 else None]
+            'Upload your Curriculum Vitae/Resume *': [f"s3://{s3_bucket_name}/cv_resume/{Name}_{upload2.name}" if upload2 else None],
+            'Please upload your bio and a professional headshot.': [f"s3://{s3_bucket_name}/bio_headshot/{Name}_{upload3.name}" if upload3 else None]
         }
 
     df = pd.DataFrame(data)
@@ -304,3 +355,4 @@ if st.button(combined_button_text):
 # Call the upload function
     #upload_csv(uploaded_file)
     
+

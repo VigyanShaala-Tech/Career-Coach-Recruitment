@@ -144,7 +144,7 @@ if upload2:
 # File upload for bio and headshot
 upload3 = st.file_uploader('Please upload your bio and a professional headshot.', accept_multiple_files=False, type=["pdf", "txt", "jpg", "png"])
 if upload3:
-    s3_file_name = f"bio_headshot/{Name}_{upload3.name}"
+    s3_file_name = f"Bio_headshot/{Name}_{upload3.name}"
     if upload_to_s3(upload3, s3_bucket_name, s3_file_name):
         st.success(f"Bio and headshot uploaded successfully to S3: {s3_file_name}")
 

@@ -236,7 +236,7 @@ if st.button(combined_button_text):
 
 
     # Store the DataFrame in the database table
-    table_name = 'Career_Rec'  # Replace with your table name
+    table_name = 'Career_Recruitment'  # Replace with your table name
     data_to_insert = combined_df.values.tolist()
     data_to_insert = pd.DataFrame(data_to_insert,columns=combined_df.columns)
     data_to_insert.to_sql(name=table_name, con=engine, if_exists='append', index=False)

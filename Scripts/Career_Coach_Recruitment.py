@@ -16,6 +16,8 @@ from google.oauth2 import service_account
 import json
 import numpy as np
 import boto3
+from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
 load_dotenv()
@@ -214,145 +216,31 @@ else:
     combined_df = create_feedback_dataframe( Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,' ',session,Binary,workshop,conducted,upload1,call,upload2,upload3)
 
 
-supabase_credentials_url = 'https://twetkfnfqdtsozephdse.supabase.co/storage/v1/object/sign/stemcheck/career-coach-recruitment-bbd9c36f47fe.json?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzdGVtY2hlY2svY2FyZWVyLWNvYWNoLXJlY3J1aXRtZW50LWJiZDljMzZmNDdmZS5qc29uIiwiaWF0IjoxNzI4MDM5OTAzLCJleHAiOjE3NTk1NzU5MDN9.kJOrZP03igSz_fTxLWjbN5svQCYcJZN3xZ9peyHAGY8&t=2024-10-04T11%3A04%3A48.676Z'
-
-# Fetch service account credentials from Supabase storage
-response = requests.get(supabase_credentials_url)
-
-if response.status_code == 200:
-# Decode the content of the response as a JSON keyfile and create service account credentials
-    service_account_info = response.json()
-    
-# Use the service account info to create credentials
-    creds = service_account.Credentials.from_service_account_info(service_account_info, scopes= ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive'])
-    client = gspread.authorize(creds)
-# Obtain an access token for the specified scope
-    access_token = creds.token
-
-        # The access_token variable now contains the access token that can be used to authenticate requests to the Google API
-else:
-    print("Failed to fetch the service account credentials. Status code:", response.status_code)
-
-
-
 # Create a button in Streamlit
 combined_button_text = "Submit"
 if st.button(combined_button_text):
-    # Insert the feedback dataframe into the Google Sheet
-    sheet_key = '1LqOFw7Ho2_Y2Snb0sxgGTyRDz6IWGs58iIRbNOQfSLA'
-    #sheet = client.open_by_key(sheet_key).get_worksheet(0)  # Update with the correct sheet name or index
-    sheet = client.open('Career_Coach_Recruitment ').sheet1
-    # Get existing data and determine the next row
-    existing_data = sheet.get_all_values()
-    next_row_index = len(existing_data) + 1
-        
-    # Append the new data below the already stored data
-    data_to_insert = combined_df.values.tolist()
-    sheet.update(f'A{next_row_index}', data_to_insert)
-    st.write("Feedback data inserted successfully")
-
-    uploaded_file = upload1.getvalue() if upload1 is not None else None
-
-    #if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
-        #json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3)
-    #else:
-        #json_serializable_data = create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, '', session, Binary, workshop, conducted, upload1, call, upload2, upload3)
-
-    json_serializable_data = combined_df
-
-
-    def convert_numpy_arrays_to_lists(data):
-        if isinstance(data, dict):
-            return {key: convert_numpy_arrays_to_lists(value) for key, value in data.items()}
-        elif isinstance(data, np.ndarray):
-            return data.tolist()
-        else:
-            return data
-
-    # Convert NumPy arrays to lists within json_serializable_data
-    converted_data = convert_numpy_arrays_to_lists(json_serializable_data)
-
-    # Check the data type of each value in the converted_data dictionary
-    for key, value in converted_data.items():
-        print(f"Key: {key}, Value Type: {type(value)}")
-
-# Verify the content of the converted_data dictionary to ensure it contains lists
-    print(converted_data)
-
-    # Extract values as list from the dictionary
-    values_list = list(converted_data.values())
-
-# Now try to extract the values as a list
-    try:
-        values_list = list(converted_data.values())
-        print("Successfully extracted values as a list:", values_list)
-    except Exception as e:
-        print("An error occurred while trying to extract values as a list:", e)
-
-
-    # Create a dictionary from the values list
-    dict_values = {index: value for index, value in enumerate(values_list)}
-
-    create_feedback_dataframe(dict_values)
-    st.success('Data submitted to Google Sheet successfully!')
-
-    #Demo code to add the google drive API . Please give it a AWS backend connection. 
-    #####################
-    #Define google drive API Scope here
-    #SCOPES = ['https://www.googleapis.com/auth/drive.file']
-    #PARENT_FOLDER_ID = "14OXiGuiaksXmeTigOtHHRtky7bU8dOpG"
-
-    ## Function to upload a Pdf/text file to Google Drive
-
-    #def upload_csv(uploaded_file):
-        #try:
-            # Get the current directory of the script
-            #current_dir = os.path.dirname(os.path.abspath(__file__))
-        
-            # Path to the service account JSON file
-            #json_file_path = os.path.join(current_dir, 'strong-jetty-435412-q0-a8ef3686d38f.json')
-
-            ##Please add this json file obtained from google cloud console to the aws cloud , for now it it present on the supabase.
-
-            # Load the credentials from the service account JSON file
-            #creds = service_account.Credentials.from_service_account_file(
-                #json_file_path,
-                #scopes=SCOPES
-            #) 
-
-            # Build the Drive service
-            #service = build('drive', 'v3', credentials=creds)
-        
-            # Create a temporary file to save the uploaded file
-            #with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                #temp_file.write(uploaded_file.read())  # Save the uploaded file to the temp file
-                #temp_file_path = temp_file.name  # Get the temp file path
-
-                # Metadata for the file
-                #file_metadata = {
-                    #'name': uploaded_file.name,  # Use the uploaded file name
-                    #'parents': ['your_parent_folder_id']  # The ID of the folder where the file will be uploaded
-                #}
-
-                # Upload the file with the appropriate MIME type
-                #media = MediaFileUpload(temp_file_path, mimetype='text/csv', resumable=True)
-                #file = service.files().create(
-                    #body=file_metadata,
-                    #media_body=media,
-                    #fields='id'
-                #).execute()
-
-                # File uploaded successfully
-                #st.success(f"CSV file uploaded successfully with ID: {file.get('id')}")
-
-                # Clean up the temporary file after uploading
-                #os.remove(temp_file_path)
-
-        #except Exception as e:
-            #st.error(f"An error occurred: {e}")
-
-# Assuming uploaded_file is a file uploaded using Streamlit file uploader
-# Call the upload function
-    #upload_csv(uploaded_file)
     
+    # AWS RDS database connection info
+    db_username = 'vigyan'
+    db_password = '321#Dev'
+    db_name = 'vigyan'
+    db_port = '3306'
+    db_endpoint = '35.154.220.255'
 
+
+    # Create the connection string
+    engine_str = f"mysql+mysqlconnector://{db_username}:{db_password}@{db_endpoint}:{db_port}/{db_name}"
+
+    # Create the SQLAlchemy engine
+    engine = create_engine(engine_str)
+
+
+    # Store the DataFrame in the database table
+    table_name = 'Career_Rec'  # Replace with your table name
+    data_to_insert = combined_df.values.tolist()
+    data_to_insert = pd.DataFrame(data_to_insert,columns=combined_df.columns)
+    data_to_insert.to_sql(name=table_name, con=engine, if_exists='append', index=False)
+    #combined_df.to_sql(name='Career_rec', con=engine, if_exists='append', index=False)
+    st.success('Thankyou for your response.')
+
+    

@@ -221,11 +221,11 @@ combined_button_text = "Submit"
 if st.button(combined_button_text):
     
     # AWS RDS database connection info
-    db_username = 'vigyan'
-    db_password = '321#Dev'
-    db_name = 'vigyan'
-    db_port = '3306'
-    db_endpoint = '35.154.220.255'
+    db_username = ''
+    db_password = ''
+    db_name = ''
+    db_port = ''
+    db_endpoint = ''
 
 
     # Create the connection string

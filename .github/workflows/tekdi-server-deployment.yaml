@@ -1,0 +1,26 @@
+name: Tekdi-Prod-Server for Vigyanshaala 
+on:
+  push:
+    branches:
+      - main
+jobs:
+   deploy_Career_page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - 
+      name: Deploy Stack
+      uses: appleboy/ssh-action@master
+      with:
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH }}
+          port: ${{ secrets.PORT }}
+          script: |    
+               cd ${{ secrets.TARGET_DIR }}
+               if [ -f .env ]; then
+               rm .env
+               fi
+               echo '${{ secrets.QA_ENV }}"' > .env
+               ls -ltra
+               ./deploy.sh

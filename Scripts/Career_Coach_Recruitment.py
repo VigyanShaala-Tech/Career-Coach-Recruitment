@@ -219,21 +219,23 @@ else:
 # Create a button in Streamlit
 combined_button_text = "Submit"
 if st.button(combined_button_text):
-    
+
     # AWS RDS database connection info
-    db_username = ''
-    db_password = ''
-    db_name = ''
-    db_port = ''
-    db_endpoint = ''
+    DB_USERNAME=os.getenv('DB_USERNAME')
+    DB_PASSWORD=os.getenv('DB_PASSWORD')
+    DB_NAME=os.getenv('DB_NAME')
+    DB_PORT=os.getenv('DB_PORT')
+    DB_ENDPOINT=os.getenv('DB_ENDPOINT')
+
 
 
     # Create the connection string
-    engine_str = f"mysql+mysqlconnector://{db_username}:{db_password}@{db_endpoint}:{db_port}/{db_name}"
+    engine_str = f"mysql+mysqlconnector://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}:{DB_PORT}/{DB_NAME}"
 
     # Create the SQLAlchemy engine
     engine = create_engine(engine_str)
 
+    
 
     # Store the DataFrame in the database table
     table_name = 'Career_Recruitment'  # Replace with your table name

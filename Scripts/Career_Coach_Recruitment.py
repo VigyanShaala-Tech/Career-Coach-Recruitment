@@ -228,13 +228,6 @@ if st.button(combined_button_text):
     DB_ENDPOINT=os.getenv('DB_ENDPOINT')
 
 
-    # Ensure that DB_PORT is a valid integer
-    try:
-        db_port = int(DB_PORT)
-    except (ValueError, TypeError):
-        # Handle the case where DB_PORT is not a valid integer
-        print("Error: The DB_PORT environment variable is not a valid integer")
-        
 
     # Create the connection string
     engine_str = f"mysql+mysqlconnector://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}:{DB_PORT}/{DB_NAME}"

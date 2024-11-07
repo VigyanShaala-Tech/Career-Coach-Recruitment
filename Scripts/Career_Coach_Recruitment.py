@@ -20,6 +20,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import create_engine, text
 from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
+import urllib.parse
 load_dotenv()
 
 # AWS credentials setup
@@ -127,33 +128,89 @@ Binary=st.radio('Based on the choices you made in the previous question, do you 
 workshop=st.text_input('Are there any other workshop topics that you would like to cover?')
 conducted=st.radio('How many such workshops have you conducted so far?*',("None","1-10","11-20","More than 20"))
 
-
+file_url_1 = "Not uploaded"
+file_url_2 = "Not uploaded"
+file_url_3 = "Not uploaded"
 
 # File upload for sample work
 upload1 = st.file_uploader(' If possible, please upload a sample of your work.', accept_multiple_files=False, type=["pdf", "txt"])
-if upload1:
-    s3_file_name = f"sample_work/{Name}_{upload1.name}" #name can be modified
+if upload1 is not None:  
+    # Define the folder name and S3 file path
+    folder_name = "sample_work"
+    s3_file_name = f"{folder_name}/{upload1.name}"
+    s3_bucket_name = s3_bucket_name  # replace with your actual bucket name
+
+    # Upload file to S3
     if upload_to_s3(upload1, s3_bucket_name, s3_file_name):
-        st.success(f"Sample work uploaded successfully to S3: {s3_file_name}")
+        st.success("Sample of your work uploaded successfully.")
+
+        # Encode the file name in the URL to handle spaces and other special characters
+        encoded_file_name = urllib.parse.quote(upload1.name)
+        encoded_folder_name = urllib.parse.quote(folder_name)
+        
+        # Construct the URL to the uploaded file
+        file_url_1 = f"https://{s3_bucket_name}.s3.ap-south-1.amazonaws.com/{encoded_folder_name}/{encoded_file_name}"
+        st.write(f"[Access your uploaded file]({file_url_1})")
+    else:
+        st.error("Failed to upload sample work to S3. Please try again.")
+else:
+    file_url_1 = "Not uploaded"
+
 
 # File upload for CV/Resume
 upload2 = st.file_uploader('Upload your Curriculum Vitae/Resume*', accept_multiple_files=False, type=["pdf", "txt"])
-if upload2:
-    s3_file_name = f"cv_resume/{Name}_{upload2.name}"
+if upload2 is not None:  
+    # Define the folder name and S3 file path
+    folder_name = "cv_resume"
+    s3_file_name = f"{folder_name}/{upload2.name}"
+    s3_bucket_name = s3_bucket_name  # replace with your actual bucket name
+
+
+    # Upload file to S3
     if upload_to_s3(upload2, s3_bucket_name, s3_file_name):
-        st.success(f"CV/Resume uploaded successfully to S3: {s3_file_name}")
+        st.success("Curriculum Vitae/Resume uploaded successfully.")
+
+        # Encode the file name in the URL to handle spaces and other special characters
+        encoded_file_name = urllib.parse.quote(upload2.name)
+        encoded_folder_name = urllib.parse.quote(folder_name)
+        
+        # Construct the URL to the uploaded file
+        file_url_2 = f"https://{s3_bucket_name}.s3.ap-south-1.amazonaws.com/{encoded_folder_name}/{encoded_file_name}"
+        st.write(f"[Access your uploaded file]({file_url_2})")
+    else:
+        st.error("Failed to upload CV/Resume to S3. Please try again.")
+else:
+    st.warning("No file uploaded for CV/Resume.")
 
 # File upload for bio and headshot
 upload3 = st.file_uploader('Please upload your bio and a professional headshot.', accept_multiple_files=False, type=["pdf", "txt", "jpg", "png"])
-if upload3:
-    s3_file_name = f"Bio_headshot/{Name}_{upload3.name}"
+if upload3 is not None:  
+    # Define the folder name and S3 file path
+    folder_name = "bio_headshot"
+    s3_file_name = f"{folder_name}/{upload3.name}"
+    s3_bucket_name = s3_bucket_name  # replace with your actual bucket name
+
+    # Upload file to S3
     if upload_to_s3(upload3, s3_bucket_name, s3_file_name):
-        st.success(f"Bio and headshot uploaded successfully to S3: {s3_file_name}")
+        st.success("Bio and headshot uploaded successfully.")
+
+        # Encode the file name in the URL to handle spaces and other special characters
+        encoded_file_name = urllib.parse.quote(upload3.name)
+        encoded_folder_name = urllib.parse.quote(folder_name)
+        
+        # Construct the URL to the uploaded file
+        file_url_3 = f"https://{s3_bucket_name}.s3.ap-south-1.amazonaws.com/{encoded_folder_name}/{encoded_file_name}"
+        st.write(f"[Access your uploaded file]({file_url_3})")
+    else:
+        st.error("Failed to upload bio and headshot to S3. Please try again.")
+else:
+    file_url_3 = "Not uploaded"
+
 
 call=st.radio('Would you be open to schedule a 10-15 minute call with us to discuss the structure/content of your class and tailor the workshop to our target audience?*',('Yes','No'))
 
 
-def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, upload1, call, upload2, upload3):
+def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a, travel_cost, session, Binary, workshop, conducted, file_url_1, call, file_url_2, file_url_3):
     if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
         data = {
             'Enter your full name *': [Name],
@@ -172,10 +229,10 @@ def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Curren
             'Based on the choices you made in the previous question, do you': [Binary],
             'Are there any other workshop topics that you would like to cove': [workshop],
             'How many such workshops have you conducted so far? *': [conducted],
-            'If possible, please upload a sample of your work.': [f"s3://{s3_bucket_name}/sample_work/{Name}_{upload1.name}" if upload1 else None],
+            'If possible, please upload a sample of your work.': [file_url_1],
             'Would you be open to schedule a 10-15 minute call with us to di': [call],
-            'Upload your Curriculum Vitae/Resume *': [f"s3://{s3_bucket_name}/cv_resume/{Name}_{upload2.name}" if upload2 else None],
-            'Please upload your bio and a professional headshot.': [f"s3://{s3_bucket_name}/bio_headshot/{Name}_{upload3.name}" if upload3 else None]
+            'Upload your Curriculum Vitae/Resume *': [file_url_2],
+            'Please upload your bio and a professional headshot.': [file_url_3]
         }
     else:
         data = {
@@ -195,26 +252,30 @@ def create_feedback_dataframe(Name, Email_id, Number, Profile, Institute, Curren
             'Based on the choices you made in the previous question, do you': [Binary],
             'Are there any other workshop topics that you would like to cove': [workshop],
             'How many such workshops have you conducted so far? *': [conducted],
-            'If possible, please upload a sample of your work.': [f"s3://{s3_bucket_name}/sample_work/{Name}_{upload1.name}" if upload1 else None],
+            'If possible, please upload a sample of your work.': [file_url_1],
             'Would you be open to schedule a 10-15 minute call with us to di': [call],
-            'Upload your Curriculum Vitae/Resume *': [f"s3://{s3_bucket_name}/cv_resume/{Name}_{upload2.name}" if upload2 else None],
-            'Please upload your bio and a professional headshot.': [f"s3://{s3_bucket_name}/bio_headshot/{Name}_{upload3.name}" if upload3 else None]
+            'Upload your Curriculum Vitae/Resume *': [file_url_2],
+            'Please upload your bio and a professional headshot.': [file_url_3]
         }
 
     df = pd.DataFrame(data)
     return df
 
 
-if not Name or not Email_id or not Number or not Institute or not Degree or not Country or not Current_city or not selected_options or not comments_a or not session or not Binary or not conducted or not call or not upload2:
+if not Name or not Email_id or not Number or not Institute or not Degree or not Country or not Current_city or not selected_options or not comments_a or not session or not Binary or not conducted or not call or not file_url_2:
     st.error("Please fill in all the compulsory fields marked with * before proceeding.")
     st.stop()
 
+if file_url_2 == "Not uploaded":
+    st.warning("Please upload the required file before proceeding.")
+    st.stop()
 
-if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year":
-    combined_df = create_feedback_dataframe( Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,travel_cost,session,Binary,workshop,conducted,upload1,call,upload2,upload3)
-else:
-    combined_df = create_feedback_dataframe( Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, selected_options, comments_a,' ',session,Binary,workshop,conducted,upload1,call,upload2,upload3)
 
+combined_df = create_feedback_dataframe(
+    Name, Email_id, Number, Profile, Institute, Current_job, Degree, Country, Current_city, 
+    selected_options, comments_a, travel_cost if comments_a == "Career coach | Conduct job/career readiness workshops |\n In-person engagement |\n 2 - 4 hours, 1-2 times a year" else '', 
+    session, Binary, workshop, conducted, file_url_1, call, file_url_2, file_url_3
+)
 
 # Create a button in Streamlit
 combined_button_text = "Submit"

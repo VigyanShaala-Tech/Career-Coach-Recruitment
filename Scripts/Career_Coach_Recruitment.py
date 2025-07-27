@@ -55,10 +55,10 @@ def upload_to_s3(file, bucket_name, s3_file_name):
 def get_timestamp():
     return datetime.now()
 
-# Display the PNG image in the top centre of the Streamlit sidebar with custom dimensions
-image_path = 'https://twetkfnfqdtsozephdse.supabase.co/storage/v1/object/sign/stemcheck/VS-logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzdGVtY2hlY2svVlMtbG9nby5wbmciLCJpYXQiOjE3MjE5NzA3ODUsImV4cCI6MTc1MzUwNjc4NX0.purLZOGk272W80A4OlvnavqVB9u-yExhzpmI3dZrjdM&t=2024-07-26T05%3A13%3A02.704Z'
+# Display the PNG image in the top left corner of the Streamlit sidebar with custom dimensions
+image_path = "https://raw.githubusercontent.com/VigyanShaala-Tech/Career-Coach-Recruitment/3e65b0028b0107771a8530faa509003377bfa9fc/image/VS-logo.png"
 st.markdown(
-    f'<div style="text-align:center"><img src="{image_path}" width="150"></div>',
+    f'<div style="text-align:center"><img src="{image_path}" width="200"></div>',
     unsafe_allow_html=True
 )
 
@@ -291,7 +291,7 @@ if st.button(combined_button_text):
 
 
     # Create the connection string
-    engine_str = f"mysql+mysqlconnector://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}:{DB_PORT}/{DB_NAME}"
+    engine_str = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}:{DB_PORT}/{DB_NAME}"
 
     # Create the SQLAlchemy engine
     engine = create_engine(engine_str)
@@ -299,7 +299,7 @@ if st.button(combined_button_text):
     
 
     # Store the DataFrame in the database table
-    table_name = 'Career_Recruitment'  # Replace with your table name
+    table_name = 'career_recruitment'  # Replace with your table name
     data_to_insert = combined_df.values.tolist()
     data_to_insert = pd.DataFrame(data_to_insert,columns=combined_df.columns)
     data_to_insert.to_sql(name=table_name, con=engine, if_exists='append', index=False)

@@ -282,16 +282,16 @@ combined_button_text = "Submit"
 if st.button(combined_button_text):
 
     # AWS RDS database connection info
-    DB_USERNAME=os.getenv('DB_USERNAME')
+    DB_USER=os.getenv('DB_USER')
     DB_PASSWORD=os.getenv('DB_PASSWORD')
     DB_NAME=os.getenv('DB_NAME')
     DB_PORT=os.getenv('DB_PORT')
-    DB_ENDPOINT=os.getenv('DB_ENDPOINT')
+    DB_HOST=os.getenv('DB_HOST')
 
 
 
     # Create the connection string
-    engine_str = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}:{DB_PORT}/{DB_NAME}"
+    engine_str = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
     # Create the SQLAlchemy engine
     engine = create_engine(engine_str)
@@ -299,10 +299,10 @@ if st.button(combined_button_text):
     
 
     # Store the DataFrame in the database table
-    table_name = 'career_recruitment'  # Replace with your table name
+    table_name = 'career_coach_recruitment_sheet'  # Replace with your table name
     data_to_insert = combined_df.values.tolist()
     data_to_insert = pd.DataFrame(data_to_insert,columns=combined_df.columns)
-    data_to_insert.to_sql(name=table_name, con=engine, if_exists='append', index=False)
+    data_to_insert.to_sql(name=table_name, schema='raw', con=engine, if_exists='append', index=False)
     #combined_df.to_sql(name='Career_rec', con=engine, if_exists='append', index=False)
     st.success('Thankyou for your response.')
 
